@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>SchoolDesk</AssemblyName>
+    <RootNamespace>SchoolDesk</RootNamespace>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolDesk.Core\SchoolDesk.Core.csproj" />
+    <ProjectReference Include="..\SchoolDesk.Security\SchoolDesk.Security.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,155 @@
+<Window x:Class="SchoolDesk.AdminWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SchoolDesk"
+        Title="SchoolDesk — панель администратора" Width="960" Height="700"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <Style TargetType="TextBox"><Setter Property="Margin" Value="0,2,0,8"/><Setter Property="Padding" Value="4"/></Style>
+        <Style TargetType="Button"><Setter Property="Padding" Value="12,5"/><Setter Property="Margin" Value="0,0,6,6"/></Style>
+        <Style TargetType="CheckBox"><Setter Property="Margin" Value="0,4,0,4"/></Style>
+    </Window.Resources>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom" Margin="12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Сохранить и применить" Padding="18,7" Click="Save_Click"/>
+                <Button Content="Закрыть" Padding="18,7" Click="Close_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="Status" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0"/>
+        </DockPanel>
+
+        <TabControl Margin="8">
+            <TabItem Header="Приложения">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel Margin="0,0,12,0">
+                        <WrapPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                            <Button Content="Добавить…" Click="AddApp_Click"/>
+                            <Button Content="Удалить" Click="RemoveApp_Click"/>
+                            <Button Content="▲" Click="Up_Click"/>
+                            <Button Content="▼" Click="Down_Click"/>
+                        </WrapPanel>
+                        <ListBox x:Name="AppsList" DisplayMemberPath="Name"/>
+                    </DockPanel>
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel DataContext="{Binding SelectedItem, ElementName=AppsList}">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Название"/>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Исполняемый файл (EXE)"/>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Обзор…" Click="BrowseExe_Click" Margin="6,2,0,8"/>
+                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DockPanel>
+                            <TextBlock Text="Аргументы запуска"/>
+                            <TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Иконка (PNG/ICO/EXE; пусто — иконка программы)"/>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Обзор…" Click="BrowseIcon_Click" Margin="6,2,0,8"/>
+                                <TextBox Text="{Binding IconPath, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DockPanel>
+                            <TextBlock Text="Категория (группа на главном экране)"/>
+                            <TextBox Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="Показывать на главном экране" IsChecked="{Binding Enabled}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Оформление">
+                <StackPanel Margin="16" MaxWidth="640" HorizontalAlignment="Left">
+                    <TextBlock Text="Обои (изображение с компьютера)"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Убрать" Click="ClearWallpaper_Click" Margin="6,2,0,8"/>
+                        <Button DockPanel.Dock="Right" Content="Обзор…" Click="BrowseWallpaper_Click" Margin="6,2,0,8"/>
+                        <TextBox x:Name="WallpaperBox"/>
+                    </DockPanel>
+                    <TextBlock Text="Положение и масштаб"/>
+                    <ComboBox x:Name="ModeBox" Margin="0,2,0,12" Padding="4" SelectedValuePath="Tag">
+                        <ComboBoxItem Content="Заполнить (с обрезкой)" Tag="Fill"/>
+                        <ComboBoxItem Content="Вписать целиком" Tag="Fit"/>
+                        <ComboBoxItem Content="Растянуть" Tag="Stretch"/>
+                        <ComboBoxItem Content="По центру" Tag="Center"/>
+                    </ComboBox>
+                    <TextBlock Text="Однотонный фон (#RRGGBB или #AARRGGBB)"/>
+                    <DockPanel>
+                        <Border x:Name="ColorPreview" DockPanel.Dock="Right" Width="36" Height="30" Margin="6,0,0,0" BorderBrush="Gray" BorderThickness="1"/>
+                        <TextBox x:Name="ColorBox" TextChanged="ColorBox_TextChanged"/>
+                    </DockPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Ограничения">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <local:StringListEditor x:Name="ProcEditor" Header="Запрещённые программы (имя exe, напр. steam)"/>
+                        <local:StringListEditor x:Name="BlockEditor" Grid.Column="1" Header="Запрещённые сайты (домен или домен/путь)"/>
+                        <local:StringListEditor x:Name="AllowEditor" Grid.Column="2" Header="Разрешённые сайты (исключения)"/>
+                    </Grid>
+                    <TextBlock Grid.Row="1" TextWrapping="Wrap" Margin="8,8,8,0" Foreground="Gray"
+                               Text="Домен блокирует и все его поддомены. «yandex.ru/games» блокирует только раздел игр, обычный поиск Яндекса работает. Исключения имеют приоритет над запретами. Сайты блокируются политиками Chrome/Edge по реальному адресу (включая перенаправления)."/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Общие">
+                <ScrollViewer>
+                    <StackPanel Margin="16" MaxWidth="640" HorizontalAlignment="Left">
+                        <TextBlock Text="Название школы"/>
+                        <TextBox x:Name="SchoolBox"/>
+                        <TextBlock Text="Название компьютера"/>
+                        <TextBox x:Name="PcBox"/>
+                        <TextBlock Text="Учётная запись ученика Windows (для правил AppLocker)"/>
+                        <TextBox x:Name="StudentBox"/>
+                        <CheckBox x:Name="Chk24" Content="24-часовой формат времени"/>
+                        <CheckBox x:Name="ChkSec" Content="Показывать секунды"/>
+                        <CheckBox x:Name="ChkNotif" Content="Показывать уведомления (например, «приложение запрещено»)"/>
+                        <CheckBox x:Name="ChkGuard" Content="Мониторинг: завершать запрещённые процессы"/>
+                        <CheckBox x:Name="ChkAppLocker" Content="Применять политику AppLocker (Windows Pro/Enterprise/Education)"/>
+                        <Button Content="Восстановить настройки по умолчанию" Click="Restore_Click" HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                        <TextBlock Foreground="Gray" TextWrapping="Wrap"
+                                   Text="Пароль и учётная запись ученика при восстановлении сохраняются. Нажмите «Сохранить и применить», чтобы изменения вступили в силу."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Журнал">
+                <DockPanel Margin="8">
+                    <Button DockPanel.Dock="Top" Content="Обновить" Click="RefreshLog_Click" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Пароль">
+                <StackPanel Margin="16" MaxWidth="400" HorizontalAlignment="Left">
+                    <TextBlock Text="Текущий пароль"/>
+                    <PasswordBox x:Name="OldPwd" Padding="4" Margin="0,2,0,8"/>
+                    <TextBlock Text="Новый пароль (не короче 6 символов)"/>
+                    <PasswordBox x:Name="NewPwd" Padding="4" Margin="0,2,0,8"/>
+                    <TextBlock Text="Повторите новый пароль"/>
+                    <PasswordBox x:Name="NewPwd2" Padding="4" Margin="0,2,0,8"/>
+                    <Button Content="Изменить пароль" Click="ChangePwd_Click" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="PwdStatus" TextWrapping="Wrap"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
